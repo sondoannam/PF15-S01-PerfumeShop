@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 using Persistence;
 
@@ -6,36 +7,73 @@ namespace DAL
 {
     public class CashierDal
     {
-        public int Login(Cashier cashier)
+        private MySqlConnection connection = DbHelper.GetConnection();
+        public Cashier Login(Cashier cashier)
         {
-            int login = 0;
-            Console.WriteLine(cashier.UserName + " - " + cashier.UserPass);
-            try
+            lock (connection)
             {
-                MySqlConnection connection = DbHelper.GetConnection();
-                connection.Open();
-                MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "select * from Cashiers where user_name = '"
-                    + cashier.UserName +"' and user_pass = '"
-                    + Md5Algorithms.CreateMD5(cashier.UserPass) +"';";
-                MySqlDataReader reader = command.ExecuteReader();
-                if(reader.Read())
+                try
                 {
-                    login = reader.GetInt32("cashier_ID");
+                    connection.Open();
+                    MySqlCommand command = connection.CreateCommand();
+                    command.CommandText = "select * from Cashiers where user_name=@userName and user_pass=@userPass;";
+                    command.Parameters.AddWithValue("@userName", cashier.UserName);
+                    command.Parameters.AddWithValue("@userPass", Md5Algorithms.CreateMD5(cashier.UserPass));
+                    MySqlDataReader reader = command.ExecuteReader();
+                    if(reader.Read())
+                    {
+                        cashier.Cashier_ID = reader.GetInt32("cashier_ID");
+                    }
+                    else
+                    {
+                        cashier.Cashier_ID = 0;
+                    }
+                    reader.Close();
                 }
-                else
+                catch
                 {
-                    login = 0;
+                    cashier.Cashier_ID = -1;
+                } 
+                finally
+                {
+                    connection.Close();
                 }
-                reader.Close();
-                connection.Close();
             }
-            catch
+            return cashier;
+        }
+
+        public int Insert(Cashier cashier)
+        {
+            int? result = null;
+            MySqlConnection connection = DbHelper.GetConnection();
+            string sql = @"insert into Cashiers(cashier_name, user_name, user_pass) values 
+                        (@cashierName, @userName, @userPass);";
+            lock (connection)
             {
-                login = -1;
+                try
+                {
+                    connection.Open();
+                    MySqlCommand command = new MySqlCommand(sql, connection);
+                    command.Parameters.AddWithValue("@cashierName", cashier.Cashier_name);
+                    command.Parameters.AddWithValue("@userName", cashier.UserName);
+                    command.Parameters.AddWithValue("@userPass", cashier.UserPass);
+                    result = command.ExecuteNonQuery();
+                }
+                catch
+                {
+                    result = -2;
+                }
+                finally
+                {
+                    connection.Close();
+                }
             }
-            Console.WriteLine(login);
-            return login;
+            return result ?? 0;
+        }
+
+        public List<Cashier> GetAll()
+        {
+            return null;
         }
     }
 }

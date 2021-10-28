@@ -20,13 +20,15 @@ namespace Persistence
         public string Gender {set;get;}
         public string Ingredients {set;get;}
         public string Form {set;get;}
-        public int? YearLaunched {set;get;}
+        public string YearLaunched {set;get;}
         public string Strength {set;get;}
         public string Origin {set;get;}
         public decimal PerfumePrice {set;get;}
-        public int? TotalQuantity {set;get;}
+        public int TotalQuantity {set;get;}
         public int? Status{set;get;}
         public string Description {set;get;}
+        public int? Brand_ID {set;get;}
+        public string BrandName {set;get;}
 
         public override bool Equals(object obj)
         {

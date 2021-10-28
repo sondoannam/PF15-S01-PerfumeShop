@@ -7,11 +7,10 @@ namespace DAL
 {
     public class CashierDal
     {
-        private MySqlConnection connection = DbHelper.GetConnection();
+        private MySqlConnection connection = DbConfig.GetConnection();
         public Cashier Login(Cashier cashier)
         {
-            lock (connection)
-            {
+            
                 try
                 {
                     connection.Open();
@@ -38,18 +37,17 @@ namespace DAL
                 {
                     connection.Close();
                 }
-            }
+            
             return cashier;
         }
 
         public int Insert(Cashier cashier)
         {
             int? result = null;
-            MySqlConnection connection = DbHelper.GetConnection();
+            MySqlConnection connection = DbConfig.GetConnection();
             string sql = @"insert into Cashiers(cashier_name, user_name, user_pass) values 
                         (@cashierName, @userName, @userPass);";
-            lock (connection)
-            {
+            
                 try
                 {
                     connection.Open();
@@ -67,7 +65,7 @@ namespace DAL
                 {
                     connection.Close();
                 }
-            }
+            
             return result ?? 0;
         }
 

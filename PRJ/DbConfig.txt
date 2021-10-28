@@ -1,0 +1,1 @@
+server=localhost;user id=pf15;password=vtcacademy;port=3306;database=LoginDB;
